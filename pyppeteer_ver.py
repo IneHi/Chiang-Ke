@@ -11,14 +11,17 @@ import pyppeteer
 import requests
 ############################################
 # Custom INFO
-username = "B11002215"
-password = "08.NTUST.ece"
-course = ["BAG006301"]
+username = "B11002140"
+password = "Qwe663147$$"
+course = ["FE1581701"]
 url = "https://courseselection.ntust.edu.tw/AddAndSub/B01/B01"
 Line_Notify_token = "bdXJzcqSWjMYoN28mAtR5xd55Td1KJBEkrumNr8GFyc"
 headers = {"Authorization" : "Bearer " + Line_Notify_token, "Content-Type": "application/x-www-form-urlencoded"}
 i = 0
 ############################################
+def timestamp():
+	return "[" + str(time.localtime().tm_mon) + "/" + str(time.localtime().tm_mday) + " " + str(time.localtime().tm_hour).zfill(2) + ":" + str(time.localtime().tm_min) + ":" + str(time.localtime().tm_sec) + "] "
+
 async def main():
 
     async def login():
@@ -28,7 +31,7 @@ async def main():
             await page.type("[name='Password']", password + '\n')
             await page.waitForNavigation()
         except pyppeteer.errors.TimeoutError:
-            print("Login Fail")
+            print(timestamp() + "Login Fail")
             return 0
 
    
@@ -46,7 +49,7 @@ async def main():
         print(dialog.message)
         await dialog.dismiss()
         if dialog.message == "這門課已經在您的選課表或已經修過，請勿重複選課(課碼、課名重複)。":
-            requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": "搶到" + i + "了"})
+            requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": username + "搶到" + i + "了"})
             course.remove(i)
             if not course:
                 await browser.close()
@@ -67,18 +70,19 @@ async def main():
                 await page.click("[id='SingleAdd']")
                 await page.waitForNavigation()
         except pyppeteer.errors.TimeoutError:
-            print("No item to select")
+            print(timestamp() + "No item to select")
             if page.url == "https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection":
-                print("Re login")
+                print(timestamp() + "Re login")
                 await fucking.bypass_detections(page)
                 await login()
             elif page.url == "https://courseselection.ntust.edu.tw/Home/Error?message=%E4%B8%8D%E5%85%B7%E6%AD%A4%E7%B3%BB%E7%B5%B1%E4%BD%BF%E7%94%A8%E4%B9%8B%E6%AC%8A%E9%99%90%2CYou%20can%27t%20use%20this%20System":
-                print("Re login")
+                print(timestamp() + "Re login")
                 await fucking.bypass_detections(page)
                 await login()
             elif page.url != url:
-                print("Re direct")
+                print(timestamp() + "Re direct")
                 await page.goto(url)
+		
 
 
 
