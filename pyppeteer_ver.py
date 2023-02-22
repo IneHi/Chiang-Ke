@@ -11,30 +11,28 @@ import pyppeteer
 import requests
 ############################################
 # Custom INFO
-username = "B11002140"
-password = "Qwe663147$$"
-course = ["FE1581701"]
+username = "B11002215"
+password = "08.NTUST.ece"
+course = ["TCG078301"]
 url = "https://courseselection.ntust.edu.tw/AddAndSub/B01/B01"
 Line_Notify_token = "bdXJzcqSWjMYoN28mAtR5xd55Td1KJBEkrumNr8GFyc"
 headers = {"Authorization" : "Bearer " + Line_Notify_token, "Content-Type": "application/x-www-form-urlencoded"}
-i = 0
 ############################################
 def timestamp():
-	return "[" + str(time.localtime().tm_mon) + "/" + str(time.localtime().tm_mday) + " " + str(time.localtime().tm_hour).zfill(2) + ":" + str(time.localtime().tm_min) + ":" + str(time.localtime().tm_sec) + "] "
+    return "[" + str(time.localtime().tm_mon) + "/" + str(time.localtime().tm_mday) + " " + str(time.localtime().tm_hour).zfill(2) + ":" + str(time.localtime().tm_min).zfill(2) + ":" + str(time.localtime().tm_sec).zfill(2) + "] "
 
 async def main():
-
+    time_begin = time.time()
     async def login():
         try:
             await page.goto('https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection')
             await page.type("[name='UserName']", username)
             await page.type("[name='Password']", password + '\n')
             await page.waitForNavigation()
+            print(timestamp() + username + "Login Successfuly")
         except pyppeteer.errors.TimeoutError:
-            print(timestamp() + "Login Fail")
-            return 0
-
-   
+            print(timestamp() + username + "Login Failed")
+            return 0  
 
     browser = await launch(autoClose=False, headless=False, dumpio=True,
                            args=['--disable-infobars', '--window-size=782,831'])
@@ -46,22 +44,23 @@ async def main():
     await fucking.bypass_detections(page)
 
     async def close_dialog(dialog):
-        print(dialog.message)
         await dialog.dismiss()
         if dialog.message == "這門課已經在您的選課表或已經修過，請勿重複選課(課碼、課名重複)。":
             requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": username + "搶到" + i + "了"})
+            print(timestamp() + username + "搶到" + i + "了")
             course.remove(i)
             if not course:
                 await browser.close()
+                requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": "選完了，關閉瀏覽器。"})
         
-
-
     page.on( # start listening to js alert
         'dialog',
         lambda dialog: asyncio.ensure_future(close_dialog(dialog))
     )
+    
     await login()
     await page.goto(url)
+
     while True:
         try:
             for i in course:
@@ -70,7 +69,8 @@ async def main():
                 await page.click("[id='SingleAdd']")
                 await page.waitForNavigation()
         except pyppeteer.errors.TimeoutError:
-            print(timestamp() + "No item to select")
+            requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": "username" + "出事了阿伯"})
+            print("Error occured, Time elapsed:" + str(time.time() - time_begin))
             if page.url == "https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection":
                 print(timestamp() + "Re login")
                 await fucking.bypass_detections(page)
@@ -82,11 +82,5 @@ async def main():
             elif page.url != url:
                 print(timestamp() + "Re direct")
                 await page.goto(url)
-		
-
-
-
-
-
-
+        
 asyncio.get_event_loop().run_until_complete(main())
