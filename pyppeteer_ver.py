@@ -11,9 +11,9 @@ import pyppeteer
 import requests
 ############################################
 # Custom INFO
-username = "B11002215"
-password = "08.NTUST.ece"
-course = ["TCG078301"]
+username = "B11002140"
+password = "Qwe663147$$"
+course = ["FE1581701"]
 url = "https://courseselection.ntust.edu.tw/AddAndSub/B01/B01"
 Line_Notify_token = "bdXJzcqSWjMYoN28mAtR5xd55Td1KJBEkrumNr8GFyc"
 headers = {"Authorization" : "Bearer " + Line_Notify_token, "Content-Type": "application/x-www-form-urlencoded"}
@@ -22,14 +22,13 @@ def timestamp():
     return "[" + str(time.localtime().tm_mon) + "/" + str(time.localtime().tm_mday) + " " + str(time.localtime().tm_hour).zfill(2) + ":" + str(time.localtime().tm_min).zfill(2) + ":" + str(time.localtime().tm_sec).zfill(2) + "] "
 
 async def main():
-    time_begin = time.time()
     async def login():
         try:
             await page.goto('https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection')
             await page.type("[name='UserName']", username)
             await page.type("[name='Password']", password + '\n')
             await page.waitForNavigation()
-            print(timestamp() + username + "Login Successfuly")
+            print(timestamp() + username + " Login Successfuly")
         except pyppeteer.errors.TimeoutError:
             print(timestamp() + username + "Login Failed")
             return 0  
@@ -70,7 +69,6 @@ async def main():
                 await page.waitForNavigation()
         except pyppeteer.errors.TimeoutError:
             requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": "username" + "出事了阿伯"})
-            print("Error occured, Time elapsed:" + str(time.time() - time_begin))
             if page.url == "https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection":
                 print(timestamp() + "Re login")
                 await fucking.bypass_detections(page)
