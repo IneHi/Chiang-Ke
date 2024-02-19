@@ -9,13 +9,15 @@ import fuckcaptcha as fucking
 import time
 import pyppeteer
 import requests
+import os
+
 ############################################
 # Custom INFO
-username = "B11002140"
-password = "Qwe663147$$"
-course = ["FE1581701"]
+username = ""
+password = ""
+course = [""]
 url = "https://courseselection.ntust.edu.tw/AddAndSub/B01/B01"
-Line_Notify_token = "bdXJzcqSWjMYoN28mAtR5xd55Td1KJBEkrumNr8GFyc"
+Line_Notify_token = ""
 headers = {"Authorization" : "Bearer " + Line_Notify_token, "Content-Type": "application/x-www-form-urlencoded"}
 ############################################
 def timestamp():
@@ -34,7 +36,7 @@ async def main():
             return 0  
 
     browser = await launch(autoClose=False, headless=False, dumpio=True,
-                           args=['--disable-infobars', '--window-size=782,831'])
+                           args=['--disable-infobars', '--window-size=782,831'], executablePath="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe")
     page = await browser.newPage()
     await page.setViewport({'width': 782, 'height': 831})
     # Makes me don't look like a WebDriver
@@ -59,7 +61,7 @@ async def main():
     
     await login()
     await page.goto(url)
-
+    requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": username + "開始搶課"})
     while True:
         try:
             for i in course:
@@ -68,7 +70,7 @@ async def main():
                 await page.click("[id='SingleAdd']")
                 await page.waitForNavigation()
         except pyppeteer.errors.TimeoutError:
-            requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": "username" + "出事了阿伯"})
+            requests.post("https://notify-api.line.me/api/notify", headers=headers, data={"message": username + "出事了阿伯"})
             if page.url == "https://stuinfosys.ntust.edu.tw/NTUSTSSOServ/SSO/Login/CourseSelection":
                 print(timestamp() + "Re login")
                 await fucking.bypass_detections(page)
